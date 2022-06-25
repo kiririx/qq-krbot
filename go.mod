@@ -2,11 +2,9 @@ module qq-krbot
 
 go 1.18
 
-replace github.com/kiririx/krutils => /Users/kiriri/code/sourcecode/go-project/krutils-go
-
 require (
 	github.com/gin-gonic/gin v1.8.1
-	github.com/kiririx/krutils v0.0.1
+	github.com/kiririx/krutils v0.0.3
 )
 
 require (
