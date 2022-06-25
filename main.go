@@ -103,7 +103,7 @@ func main() {
 			}
 		}
 	})
-	r.Run(":10011") // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	r.Run(":10013") // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
 
 func trans(text string, groupId int64, transType int) {
