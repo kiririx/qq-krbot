@@ -45,8 +45,13 @@ func GetHeaders() map[string]string {
 }
 
 func DownloadImg(url string) (string, error) {
-	referer := "https://app-api.pixiv.net/"
 	ext, _ := GetFileExt(url)
+	fileName := algo_util.MD5(url) + "." + ext
+	_, err := os.Stat("./photo/" + fileName)
+	if err == nil {
+		return fileName, nil
+	}
+	referer := "https://app-api.pixiv.net/"
 	resp, err := http_util.Client(time.Second * 20).Proxy(proxyUrl).Headers(map[string]string{
 		"Referer": referer,
 	}).Get(url)
@@ -54,7 +59,6 @@ func DownloadImg(url string) (string, error) {
 		fmt.Println(err.Error())
 		return "", err
 	}
-	fileName := algo_util.UUID() + "." + ext
 	f, err := os.Create("./photo/" + fileName)
 	if err != nil {
 		fmt.Println(err.Error())
