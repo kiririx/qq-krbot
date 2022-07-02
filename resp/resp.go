@@ -5,8 +5,10 @@ import (
 	"github.com/kiririx/krutils/algo_util"
 	"github.com/kiririx/krutils/str_util"
 	"io/ioutil"
+	"qq-krbot/dao"
 	"qq-krbot/handler"
 	"qq-krbot/req"
+	"time"
 )
 
 var (
@@ -29,15 +31,22 @@ func ImgResp(url string, subType int) string {
 }
 
 func init() {
-	// 涩图列表
-	AnimeImages = make([]string, 0)
-	files, _ := ioutil.ReadDir("./photo")
-	for _, file := range files {
-		if file.IsDir() {
-			continue
+	go func() {
+		for {
+			select {
+			case <-time.After(time.Second * 5):
+				// 涩图列表
+				AnimeImages = make([]string, 0)
+				files, _ := ioutil.ReadDir("./photo")
+				for _, file := range files {
+					if file.IsDir() {
+						continue
+					}
+					AnimeImages = append(AnimeImages, file.Name())
+				}
+			}
 		}
-		AnimeImages = append(AnimeImages, file.Name())
-	}
+	}()
 }
 
 func DNFGold(*req.Param) (string, error) {
@@ -53,23 +62,20 @@ func DNFGold(*req.Param) (string, error) {
 }
 
 func Help(*req.Param) (string, error) {
-	return "🌸リカちゃんの使う方🌸\n" +
-		"1. 翻訳：『日中　おはようございます』" + "\n" +
-		"2. エロな絵: 『#可可萝』（#searchKey）を送信する" + "\n" +
-		"3. 天気予報（開発中）" + "\n" +
-		"4. AIリプ（開発中）" + "\n" +
-		"5. DNFゴールド:『ゴールド』『金币』『比例』を送信する" + "\n" +
+	return "🌸梨花酱的使用方法🌸\n" +
+		"1. 翻译：发送『中日　早上好』" + "\n" +
+		"2. 涩图: 发送『#可可萝』（#要搜索的内容）" + "\n" +
+		"3. 天气预报（开发中）" + "\n" +
+		"4. AI回复（开发中）" + "\n" +
+		"5. DNF金币比例: 发送『金币』或『比例』" + "\n" +
 		"6. ......" + "\n", nil
 }
 
 func Translate(r *req.Param) (string, error) {
 	transType := str_util.SubStr(r.Message, -1, 2)
 	transText := str_util.SubStr(r.Message, 3, -1)
-	result := "🌸リカちゃんの翻訳結果🌸：" + handler.Translate(handler.LangReflect[transType], transText)
-	if r.CQ == "at" {
-		return AtResp(result, r.UserId), nil
-	}
-	return result, nil
+	result := "🌸翻译结果🌸：" + handler.Translate(handler.LangReflect[transType], transText)
+	return AtResp(result, r.UserId), nil
 }
 
 func EroImagesSearch(r *req.Param) (string, error) {
@@ -78,7 +84,6 @@ func EroImagesSearch(r *req.Param) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	fmt.Println(m)
 	photos := make([]string, 0)
 	illusts := m["illusts"].([]interface{})
 	for _, illust := range illusts {
@@ -102,12 +107,32 @@ func EroImagesSearch(r *req.Param) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return ImgResp("http://127.0.0.1:10011/photo/"+imgName, 0), nil
+	return ImgResp("http://127.0.0.1:10013/photo/"+imgName, 0), nil
 }
 
 func EroImages(*req.Param) (string, error) {
 	fileName := AnimeImages[algo_util.RandomInt(0, len(AnimeImages))]
-	return ImgResp("http://127.0.0.1:10011/photo/"+fileName, 0), nil
+	return ImgResp("http://127.0.0.1:10013/photo/"+fileName, 0), nil
+}
+
+func Text(req *req.Param) (string, error) {
+	c, err := dao.ContentDao.QueryRandAndLimit("text", 1)
+	if err != nil {
+		return "", err
+	}
+	return c[0].Content, nil
+}
+
+func Word(req *req.Param) (string, error) {
+	c, err := dao.ContentDao.QueryRandAndLimit("word", 10)
+	if err != nil {
+		return "", err
+	}
+	contents := ""
+	for _, v := range c {
+		contents += v.Content + "\n"
+	}
+	return contents, nil
 }
 
 func SimpleReflect(*req.Param) (string, error) {

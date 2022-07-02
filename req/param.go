@@ -16,7 +16,7 @@ type Param struct {
 	CQ          string
 }
 
-// [CQ:at,qq=1105624883] 时尚
+// Parse [CQ:at,qq=11056248xx]
 func (p *Param) Parse() {
 	if p.PostType == "message" {
 		regex := `\[CQ:at,qq=(\d+)\]`

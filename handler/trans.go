@@ -84,7 +84,7 @@ func Translate(tranType int, text string) string {
 		"signType": "v3",
 		"curtime":  curtime,
 	}
-	resp, err := http_util.Client(time.Second*4).PostFormGetJSON(YDAPIURL, params)
+	resp, err := http_util.Client().PostFormGetJSON(YDAPIURL, params)
 	log.Println("params => ", params)
 	log.Println(resp, err)
 	if err != nil || resp["errorCode"] != "0" {

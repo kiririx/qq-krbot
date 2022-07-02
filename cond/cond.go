@@ -48,3 +48,7 @@ func EroImages(param *req.Param) bool {
 func SimpleReflect(param *req.Param) bool {
 	return map_util.ContainsKey(BaseReflect, param.Message)
 }
+
+func Text(param *req.Param) bool {
+	return str_util.Equals(param.Message, "文章", "课文")
+}

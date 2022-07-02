@@ -6,6 +6,7 @@ import (
 	"github.com/kiririx/krutils/http_util"
 	"github.com/kiririx/krutils/str_util"
 	"log"
+	"net/http"
 	"qq-krbot/req"
 	"qq-krbot/trigger"
 	"time"
@@ -15,6 +16,12 @@ const (
 	// CqHttp go-cqhttp 地址
 	CqHttp = "http://127.0.0.1:5700"
 )
+
+func Ping(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"message": "pong",
+	})
+}
 
 func Bot(c *gin.Context) {
 	param := &req.Param{}
@@ -30,13 +37,14 @@ func Bot(c *gin.Context) {
 	if param.PostType == "message" {
 		log.Println("接收消息:", param.Message)
 		for _, tg := range trigger.Triggers {
-			if tg.Condition(param) {
+			if tg.Cq == param.CQ && tg.Condition(param) {
 				msg, err := tg.Callback(param)
 				if err != nil {
 					Error(err, param.GroupId)
 					return
 				}
 				sendToGroup(param.GroupId, msg)
+				break
 			}
 		}
 	}
@@ -44,7 +52,7 @@ func Bot(c *gin.Context) {
 
 func sendToGroup(groupId int64, msg string) {
 	url := CqHttp + "/send_group_msg"
-	resp, err := http_util.Client(time.Second*10).PostJSON(url, map[string]any{
+	resp, err := http_util.Client().Timeout(time.Second*30).PostJSON(url, map[string]any{
 		"group_id": str_util.ToStr(groupId),
 		"message":  msg,
 	})

@@ -29,8 +29,8 @@ func addTrigger(cq string, condition func(*req.Param) bool, callback func(*req.P
 func init() {
 	addTrigger("at", cond.Help, resp.Help)
 	addTrigger("at", cond.DNFGold, resp.DNFGold)
-	addTrigger("gm", cond.Translate, resp.Translate)
 	addTrigger("at", cond.Translate, resp.Translate)
-	addTrigger("gm", cond.EroImagesSearch, resp.EroImagesSearch)
+	addTrigger("at", cond.EroImagesSearch, resp.EroImagesSearch)
 	addTrigger("at", cond.EroImages, resp.EroImages)
+	addTrigger("at", cond.Text, resp.Text)
 }

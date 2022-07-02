@@ -9,7 +9,6 @@ import (
 	"github.com/gocolly/colly/v2/proxy"
 	"github.com/kiririx/krutils/algo_util"
 	"github.com/kiririx/krutils/http_util"
-	"github.com/kiririx/krutils/json_util"
 	"io"
 	"log"
 	"os"
@@ -100,9 +99,9 @@ func DownLoad() {
 		for _, photo := range photos {
 			ext, _ := GetFileExt(photo)
 
-			resp, err := http_util.Client(time.Second * 3).Proxy(proxyUrl).Headers(map[string]string{
+			resp, err := http_util.Client().Proxy(proxyUrl).Headers(map[string]string{
 				"Referer": referer,
-			}).Get(photo)
+			}).Get(photo, nil)
 			if err != nil {
 				fmt.Println(err.Error())
 				return
@@ -142,7 +141,7 @@ func auth(username, password, refreshToken string, headers map[string]any) {
 	px.Headers["X-Client-Hash"] = genClientHash(localTime)
 	px.Headers["User-Agent"] = "PixivAndroidApp/5.0.115 (Android 6.0)"
 	// todo may have error
-	json, err := http_util.Client(time.Second*3).
+	json, err := http_util.Client().
 		Proxy("http://127.0.0.1:7890").
 		PostFormGetJSON("https://oauth.secure.pixiv.net"+"/auth/token", map[string]string{
 			"client_id":     client_id,
@@ -172,7 +171,7 @@ func illust_ranking() []string {
 	url := host + "/v1/illust/ranking"
 	mode := "day_male_r18"
 	filter := "for_ios"
-	json, err := http_util.Client(time.Second*3).Proxy(proxyUrl).Headers(GetHeaders()).GetJSON(url, map[string]string{
+	json, err := http_util.Client().Proxy(proxyUrl).Headers(GetHeaders()).GetJSON(url, map[string]string{
 		"mode":   mode,
 		"filter": filter,
 	})
@@ -181,8 +180,7 @@ func illust_ranking() []string {
 		return nil
 	}
 	photos := make([]string, 0)
-	m, err := json_util.JSON2Map(json)
-	illusts := m["illusts"].([]interface{})
+	illusts := json["illusts"].([]interface{})
 	for _, illust := range illusts {
 		image := illust.(map[string]interface{})["image_urls"].(map[string]interface{})
 		if image["large"] != "" {
