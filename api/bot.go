@@ -52,19 +52,22 @@ func Bot(c *gin.Context) {
 
 func sendToGroup(groupId int64, msg string) {
 	url := CqHttp + "/send_group_msg"
-	resp, err := http_util.Client().Timeout(time.Second*30).PostJSON(url, map[string]any{
-		"group_id": str_util.ToStr(groupId),
+	sendGroupId := str_util.ToStr(groupId)
+	resp, err := http_util.Client().Timeout(time.Second*30).PostString(url, map[string]any{
+		"group_id": sendGroupId,
 		"message":  msg,
 	})
 	if err != nil {
 		Error(err, groupId)
 		return
 	}
-	fmt.Println(resp)
+	fmt.Println("group_id => ", sendGroupId)
+	fmt.Println("cq-http-resp => ", resp)
+
 }
 
 func Error(err error, groupId int64) {
 	if err != nil {
-		sendToGroup(groupId, "🌸リカちゃんが壊れた：error => 🌸"+err.Error())
+		log.Println(groupId, "Error => 🌸", err)
 	}
 }

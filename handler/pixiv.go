@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/kiririx/krutils/algo_util"
 	"github.com/kiririx/krutils/http_util"
+	"github.com/kiririx/krutils/str_util"
 	"io"
 	"os"
 	"path"
@@ -23,6 +24,7 @@ var (
 	AccessToken    = ""
 	proxyUrl       = "http://127.0.0.1:7890"
 	ExpireTime     int64
+	PixivPageSize  = 30
 )
 
 type PixivClient struct {
@@ -53,7 +55,7 @@ func DownloadImg(url string) (string, error) {
 	if err == nil {
 		return fileName, nil
 	}
-	referer := "https://app-api.pixiv.net/"
+	referer := "https://www.pixiv.net/"
 	resp, err := http_util.Client().Timeout(time.Second*99).Proxy(proxyUrl).Headers(map[string]string{
 		"Referer": referer,
 	}).Get(url, nil)
@@ -62,6 +64,36 @@ func DownloadImg(url string) (string, error) {
 		return "", err
 	}
 	f, err := os.Create("./photo/" + fileName)
+	if err != nil {
+		fmt.Println(err.Error())
+		return "", err
+	}
+	io.Copy(f, resp.Body)
+	f.Close()
+	return fileName, nil
+}
+
+func DownloadImgAndTag(url string, tag string) (string, error) {
+	dirPath := "./photo/" + tag
+	err := os.MkdirAll(dirPath, os.ModePerm)
+	if err != nil {
+		return "", err
+	}
+	ext, _ := GetFileExt(url)
+	fileName := algo_util.MD5(url) + "." + ext
+	_, err = os.Stat(dirPath + "/" + fileName)
+	if err == nil {
+		return fileName, nil
+	}
+	referer := "https://www.pixiv.net/"
+	resp, err := http_util.Client().Timeout(time.Second*99).Proxy(proxyUrl).Headers(map[string]string{
+		"Referer": referer,
+	}).Get(url, nil)
+	if err != nil {
+		fmt.Println(err.Error())
+		return "", err
+	}
+	f, err := os.Create(dirPath + "/" + fileName)
 	if err != nil {
 		fmt.Println(err.Error())
 		return "", err
@@ -168,7 +200,7 @@ func Recommend() (map[string]interface{}, error) {
 	return json, nil
 }
 
-func Search(tag string) (map[string]interface{}, error) {
+func Search(tag string, offset int) (map[string]interface{}, error) {
 	url := base_hosts + "/v1/search/illust"
 	headers, err := GetHeaders()
 	if err != nil {
@@ -179,10 +211,58 @@ func Search(tag string) (map[string]interface{}, error) {
 		"search_target": "partial_match_for_tags",
 		"sort":          "popular_desc",
 		"filter":        "for_ios",
+		"offset":        str_util.ToStr(offset),
 	})
 	if err != nil {
 		fmt.Println(err.Error())
 		return nil, err
 	}
 	return json, nil
+}
+
+func GetImgUrlForSearch(tag string, offset int) ([]string, error) {
+	if offset < 1 {
+		offset = PixivPageSize
+	}
+	m, err := Search(tag, offset)
+	if err != nil {
+		return nil, err
+	}
+	photos := make([]string, 0)
+	illusts := m["illusts"].([]interface{})
+re:
+	for _, illust := range illusts {
+		itype := illust.(map[string]interface{})["type"].(string)
+		// 只采集插画资源
+		if itype != "illust" {
+			continue
+		}
+		tags := illust.(map[string]interface{})["tags"].([]interface{})
+		for _, t := range tags {
+			_t := t.(map[string]interface{})
+			// 过滤掉这些tag
+			if str_util.Contains(_t["name"].(string), "描き方", "参考", "講座", "資料", "漫画") {
+				continue re
+			}
+		}
+		image := illust.(map[string]interface{})["meta_single_page"].(map[string]interface{})
+		var imgUrl = image["original_image_url"]
+		if imgUrl != nil {
+			photos = append(photos, imgUrl.(string))
+		} else {
+			images := illust.(map[string]interface{})["meta_pages"].([]interface{})
+			// 过滤掉3张以上的作品，因为3张以上的很可能是漫画
+			if len(images) > 3 {
+				continue re
+			}
+			for _, v := range images {
+				img := v.(map[string]interface{})
+				url := img["image_urls"].(map[string]interface{})["original"]
+				if url != nil {
+					photos = append(photos, url.(string))
+				}
+			}
+		}
+	}
+	return photos, nil
 }

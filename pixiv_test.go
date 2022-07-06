@@ -197,7 +197,7 @@ func illust_ranking() []string {
 func TestC(t *testing.T) {
 	// handler.DownloadImg("https://i.pximg.net/c/600x1200_90/img-master/img/2017/11/05/14/41/36/65760041_p0_master1200.jpg")
 	// handler.Auth()
-	m, err := handler.Search("裸足")
+	m, err := handler.Search("裸足", handler.PixivPageSize)
 	if err != nil {
 		fmt.Println(err.Error())
 		return

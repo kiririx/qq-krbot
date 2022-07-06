@@ -52,3 +52,8 @@ func SimpleReflect(param *req.Param) bool {
 func Text(param *req.Param) bool {
 	return str_util.Equals(param.Message, "文章", "课文")
 }
+
+// SubscribePixiv 订阅p站色图
+func SubscribePixiv(param *req.Param) bool {
+	return str_util.StartWith(param.Message, "订阅 ")
+}

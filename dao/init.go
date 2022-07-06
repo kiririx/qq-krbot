@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/kiririx/krutils/conf_util"
 	"github.com/kiririx/krutils/logx"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -20,14 +21,27 @@ var (
 	Conn *sql.DB
 )
 
-func InitORM(dsn string, idle, max int, life time.Duration) {
+func init() {
+	dbConfig, err := conf_util.ResolveProperties("./config.properties")
+	if err != nil {
+		panic("配置文件读取失败")
+	}
+	initORM(fmt.Sprintf(
+		`%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local&&timeout=1s&readTimeout=5s&writeTimeout=5s`,
+		dbConfig[`mysql.username`],
+		dbConfig[`mysql.password`],
+		dbConfig[`mysql.host`],
+		dbConfig[`mysql.port`],
+		dbConfig[`mysql.database`],
+	), 10, 500, time.Minute*15)
+}
+
+func initORM(dsn string, idle, max int, life time.Duration) {
 	var once sync.Once
 	var err error
 
 	// 初始化数据库配置方法
 	connect := func() error {
-		// dsn := constantx.GetMysqlConn()
-		// 参考 https://github.com/go-sql-driver/mysql#dsn-data-source-name 获取详情
 		Sql, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
 			Logger: logger.New(
 				log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
@@ -42,7 +56,6 @@ func InitORM(dsn string, idle, max int, life time.Duration) {
 			PrepareStmt:            true,  // 预编译模式
 			AllowGlobalUpdate:      false, // 每次更新有赋值的字段，注意0值，如有必要临时session开启为true
 			QueryFields:            false, // 查询语句展示所有字段，就算select * 也是
-			// SkipHooks:              true,
 		})
 
 		if err != nil {
@@ -70,32 +83,11 @@ func InitORM(dsn string, idle, max int, life time.Duration) {
 		Conn.SetConnMaxLifetime(life)
 		return nil
 	}
-
 	if Sql == nil {
 		once.Do(func() {
 			_ = connect()
 		})
 	}
-
-	// 心跳检查当前数据库
-	go func() {
-		ticker := time.NewTicker(time.Minute * 1)
-		defer ticker.Stop()
-
-		for {
-			<-ticker.C
-			if Conn == nil {
-				_ = connect()
-				continue
-			}
-
-			if e := Conn.Ping(); e != nil {
-				logx.ErrorLog(`InitORM Err:`, fmt.Sprintf("数据库心跳失败:%s, 尝试重新连接", e.Error()))
-				_ = connect()
-
-			}
-		}
-	}()
 }
 
 // GetBatchDB 获取 设置批量插入数据size设置的 session

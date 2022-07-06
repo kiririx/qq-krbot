@@ -1,8 +1,10 @@
 package resp
 
 import (
+	"errors"
 	"fmt"
 	"github.com/kiririx/krutils/algo_util"
+	"github.com/kiririx/krutils/slice_util"
 	"github.com/kiririx/krutils/str_util"
 	"io/ioutil"
 	"qq-krbot/dao"
@@ -80,7 +82,7 @@ func Translate(r *req.Param) (string, error) {
 
 func EroImagesSearch(r *req.Param) (string, error) {
 	tag := str_util.SubStr(r.Message, 1, -1)
-	m, err := handler.Search(tag)
+	m, err := handler.Search(tag, handler.PixivPageSize)
 	if err != nil {
 		return "", err
 	}
@@ -102,12 +104,27 @@ func EroImagesSearch(r *req.Param) (string, error) {
 			}
 		}
 	}
-	p := photos[algo_util.RandomInt(0, len(photos))]
-	imgName, err := handler.DownloadImg(p)
+	imgName, err := download(photos)
 	if err != nil {
 		return "", err
 	}
 	return ImgResp("http://127.0.0.1:10013/photo/"+imgName, 0), nil
+}
+
+func download(photos []string) (string, error) {
+	if len(photos) < 1 {
+		return "", errors.New("all photos download failed")
+	}
+	i := algo_util.RandomInt(0, len(photos))
+	p := photos[i]
+	imgName, err := handler.DownloadImg(p)
+	if err != nil {
+		imgName, err = download(slice_util.Remove(photos, i))
+		if err != nil {
+			return "", err
+		}
+	}
+	return imgName, nil
 }
 
 func EroImages(*req.Param) (string, error) {
@@ -137,4 +154,14 @@ func Word(req *req.Param) (string, error) {
 
 func SimpleReflect(*req.Param) (string, error) {
 	return "", nil
+}
+
+func SubscribePixiv(param *req.Param) (string, error) {
+	tag := str_util.SubStr(param.Message, 3, -1)
+	tag = str_util.TrimSpace(tag)
+	_, err := dao.SubscribeDao.Save(tag, str_util.ToStr(param.UserId))
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("开始订阅「%v」相关的图片，リカ酱会大约1分钟发一次", tag), nil
 }

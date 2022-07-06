@@ -19,17 +19,22 @@ type Param struct {
 // Parse [CQ:at,qq=11056248xx]
 func (p *Param) Parse() {
 	if p.PostType == "message" {
-		regex := `\[CQ:at,qq=(\d+)\]`
-		reg, err := regexp.Compile(regex)
-		if err != nil {
-			return
-		}
-		matchedStr := reg.FindString(p.Message)
-		cqPrefix := strings.Split(matchedStr, ",")[0]
-		CQ := strings.Replace(cqPrefix, "[CQ:", "", -1)
-		if strings.HasPrefix(p.Message, "[CQ:at,qq=") {
-			p.CQ = CQ
-			p.Message = strings.TrimPrefix(p.Message, matchedStr+" ")
+		switch p.MessageType {
+		case "private":
+			p.CQ = "pr"
+		case "group":
+			regex := `\[CQ:at,qq=(\d+)\]`
+			reg, err := regexp.Compile(regex)
+			if err != nil {
+				return
+			}
+			matchedStr := reg.FindString(p.Message)
+			cqPrefix := strings.Split(matchedStr, ",")[0]
+			CQ := strings.Replace(cqPrefix, "[CQ:", "", -1)
+			if strings.HasPrefix(p.Message, "[CQ:at,qq=") {
+				p.CQ = CQ
+				p.Message = strings.TrimPrefix(p.Message, matchedStr+" ")
+			}
 		}
 	}
 }
