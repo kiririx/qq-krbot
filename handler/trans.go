@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"github.com/kiririx/krutils/algo_util"
@@ -16,10 +16,17 @@ const (
 	je
 	ec
 	ej
+	// YDAPIURL 有道词典API
+	YDAPIURL = "https://openapi.youdao.com/api"
+	// AppKey 有道APP_KEY
+	AppKey = "6a291bcc994b9a8b"
+	// AppSecret 有道APP_SECRET
+	AppSecret = "XUVMpL79kRKgPRkFAcDGCPDKjihw9aO1"
 )
 
 var (
-	LangCorr map[int]LangDict
+	LangCorr    map[int]LangDict
+	LangReflect map[string]int
 )
 
 func init() {
@@ -30,6 +37,15 @@ func init() {
 	LangCorr[je] = initLangDict("ja", "en")
 	LangCorr[ec] = initLangDict("en", "zh-CHS")
 	LangCorr[ej] = initLangDict("en", "ja")
+
+	// 语言翻译映射
+	LangReflect = make(map[string]int)
+	LangReflect["中日"] = cj
+	LangReflect["中英"] = ce
+	LangReflect["英中"] = ec
+	LangReflect["日中"] = jc
+	LangReflect["日英"] = je
+	LangReflect["英日"] = ej
 }
 
 type LangDict struct {
@@ -68,7 +84,7 @@ func Translate(tranType int, text string) string {
 		"signType": "v3",
 		"curtime":  curtime,
 	}
-	resp, err := http_util.Client(time.Second*4).PostFormGetJSON(YDAPIURL, params)
+	resp, err := http_util.Client().PostFormGetJSON(YDAPIURL, params)
 	log.Println("params => ", params)
 	log.Println(resp, err)
 	if err != nil || resp["errorCode"] != "0" {
