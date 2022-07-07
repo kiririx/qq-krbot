@@ -23,3 +23,13 @@ type SubscribeSubject struct {
 func (*SubscribeSubject) TableName() string {
 	return "subscribe_subject"
 }
+
+type SubscribeUser struct {
+	SubId     int64  `gorm:"column:sub_id"`
+	QQAccount string `gorm:"column:qq_account"`
+	gorm.Model
+}
+
+func (s *SubscribeUser) TableName() string {
+	return "subscribe_user"
+}

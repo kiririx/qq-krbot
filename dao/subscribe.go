@@ -1,22 +1,17 @@
 package dao
 
-import "github.com/kiririx/krutils/str_util"
-
 var SubscribeDao = &_SubscribeDao{}
+var SubscribeUserDao = &_SubscribeUserDao{}
 
 type _SubscribeDao struct{}
+type _SubscribeUserDao struct{}
 
 // Save 保存
 func (*_SubscribeDao) Save(tag string, qqAccount string) (SubscribeSubject, error) {
 	// todo 加行锁防止并发出现qqAccount错误
-	s := SubscribeSubject{}
-	Sql.Where("tag = ?", tag).Take(&s)
-	if s.ID > 0 && !str_util.Contains(s.QQAccount, qqAccount) {
-		qqAccount += "," + qqAccount
+	s := SubscribeSubject{
+		Tag: tag,
 	}
-	s.Tag = tag
-	s.QQAccount = qqAccount
-	s.Active = true
 	err := Sql.Save(&s).Error
 	return s, err
 }
@@ -32,4 +27,15 @@ func (*_SubscribeDao) Tags() ([]string, error) {
 		tags = append(tags, s.Tag)
 	}
 	return tags, nil
+}
+
+type TagAndUser struct {
+	Tag       string `gorm:"column:tag"`
+	QQAccount string `gorm:"column:qq_account"`
+}
+
+func (*_SubscribeUserDao) QueryTagAndUser() ([]TagAndUser, error) {
+	result := make([]TagAndUser, 0)
+	err := Sql.Raw("select su.qq_account, ss.tag from subscribe_user su, subscribe_subject ss where su.sub_id = ss.id").Scan(&result).Error
+	return result, err
 }

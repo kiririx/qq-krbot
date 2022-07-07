@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	new(work.Collect).Start()
+	new(work.CollectWorker).Start()
 	r := gin.Default()
 	r.Use(gin.Recovery())
 	r.GET("/ping", api.Ping)

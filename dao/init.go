@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/kiririx/krutils/conf_util"
 	"github.com/kiririx/krutils/logx"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -12,6 +11,7 @@ import (
 	"gorm.io/gorm/logger"
 	"log"
 	"os"
+	"qq-krbot/env"
 	"sync"
 	"time"
 )
@@ -22,17 +22,13 @@ var (
 )
 
 func init() {
-	dbConfig, err := conf_util.ResolveProperties("./config.properties")
-	if err != nil {
-		panic("配置文件读取失败")
-	}
 	initORM(fmt.Sprintf(
 		`%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local&&timeout=1s&readTimeout=5s&writeTimeout=5s`,
-		dbConfig[`mysql.username`],
-		dbConfig[`mysql.password`],
-		dbConfig[`mysql.host`],
-		dbConfig[`mysql.port`],
-		dbConfig[`mysql.database`],
+		env.Conf[`mysql.username`],
+		env.Conf[`mysql.password`],
+		env.Conf[`mysql.host`],
+		env.Conf[`mysql.port`],
+		env.Conf[`mysql.database`],
 	), 10, 500, time.Minute*15)
 }
 
