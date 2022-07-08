@@ -25,7 +25,7 @@ func (*SubscribeSubject) TableName() string {
 }
 
 type SubscribeUser struct {
-	SubId     int64  `gorm:"column:sub_id"`
+	SubId     uint   `gorm:"column:sub_id"`
 	QQAccount string `gorm:"column:qq_account"`
 	gorm.Model
 }

@@ -9,10 +9,23 @@ type _SubscribeUserDao struct{}
 // Save 保存
 func (*_SubscribeDao) Save(tag string, qqAccount string) (SubscribeSubject, error) {
 	// todo 加行锁防止并发出现qqAccount错误
+	tx := Transaction()
+	defer tx.Terminate()
 	s := SubscribeSubject{
 		Tag: tag,
 	}
-	err := Sql.Save(&s).Error
+	err := tx.Sql.Save(&s).Error
+	if err != nil {
+		return SubscribeSubject{}, err
+	}
+	err = tx.Sql.Save(&SubscribeUser{
+		QQAccount: qqAccount,
+		SubId:     s.ID,
+	}).Error
+	if err != nil {
+		return SubscribeSubject{}, err
+	}
+	tx.Commit()
 	return s, err
 }
 

@@ -11,6 +11,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"qq-krbot/env"
 	"regexp"
 	"time"
 )
@@ -22,10 +23,14 @@ var (
 	base_hosts     = "https://app-api.pixiv.net"
 	_REFRESH_TOKEN = "vE94AY1QvM8BGcJuA6o1lPFBpfwv8YrDeuaH1AQWZRQ"
 	AccessToken    = ""
-	proxyUrl       = "http://127.0.0.1:7890"
+	proxyUrl       = ""
 	ExpireTime     int64
 	PixivPageSize  = 30
 )
+
+func init() {
+	proxyUrl = env.Conf["proxy.url"]
+}
 
 type PixivClient struct {
 	Headers map[string]string
