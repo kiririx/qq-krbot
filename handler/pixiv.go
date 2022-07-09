@@ -135,7 +135,7 @@ func Auth() error {
 	px.Headers["User-Agent"] = "PixivAndroidApp/5.0.115 (Android 6.0)"
 	json, err := http_util.Client().
 		Timeout(time.Second*10).
-		Proxy("http://127.0.0.1:7890").
+		Proxy(env.Conf["proxy.url"]).
 		PostFormGetJSON("https://oauth.secure.pixiv.net"+"/auth/token", map[string]string{
 			"client_id":      client_id,
 			"client_secret":  client_secret,
@@ -226,14 +226,14 @@ func Search(tag string, offset int) (map[string]interface{}, error) {
 }
 
 func GetImgUrlForSearch(tag string, offset int) ([]string, error) {
-	if offset < 1 {
-		offset = PixivPageSize
-	}
 	m, err := Search(tag, offset)
 	if err != nil {
 		return nil, err
 	}
 	photos := make([]string, 0)
+	if m["illusts"] == nil {
+		return []string{}, nil
+	}
 	illusts := m["illusts"].([]interface{})
 re:
 	for _, illust := range illusts {

@@ -34,4 +34,6 @@ func init() {
 	addTrigger("at", cond.EroImages, resp.EroImages)
 	addTrigger("at", cond.Text, resp.Text)
 	addTrigger("pr", cond.SubscribePixiv, resp.SubscribePixiv)
+	addTrigger("pr", cond.UnSubscribePixiv, resp.UnSubscribePixiv)
+	addTrigger("pr", cond.Health, resp.Health)
 }

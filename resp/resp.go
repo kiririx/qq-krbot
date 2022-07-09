@@ -165,3 +165,15 @@ func SubscribePixiv(param *req.Param) (string, error) {
 	}
 	return fmt.Sprintf("开始订阅「%v」相关的图片，リカ酱会大约1分钟发一次", tag), nil
 }
+
+func UnSubscribePixiv(param *req.Param) (string, error) {
+	err := dao.SubscribeUserDao.ClearByUser(str_util.ToStr(param.UserId))
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("已经取消全部订阅，几分钟后リカ酱不会发送信息，如需重新订阅请输入：订阅 xxx"), nil
+}
+
+func Health(param *req.Param) (string, error) {
+	return "pong", nil
+}

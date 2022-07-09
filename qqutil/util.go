@@ -19,6 +19,9 @@ func SendPrivateMessage(targetQQ string, msg QQMsg) {
 	if cqHttp == "" {
 		panic("CQHttp地址未配置")
 	}
+	if msg.CQ == "image" && msg.FileURL == "" {
+		return
+	}
 	url := cqHttp + "/send_private_msg"
 	resp, err := http_util.Client().Timeout(time.Second*30).Headers(map[string]string{
 		"content-type": "application/json",

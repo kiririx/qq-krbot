@@ -2,7 +2,7 @@ package work
 
 import (
 	"github.com/kiririx/krutils/algo_util"
-	"log"
+	"github.com/kiririx/krutils/convert"
 	"qq-krbot/dao"
 	"qq-krbot/env"
 	"qq-krbot/qqutil"
@@ -14,23 +14,47 @@ type SendWorker struct {
 
 func (*SendWorker) Start() {
 	go func() {
+		update := false
 		// query to subscribe and user list
-		tagUsers, err := dao.SubscribeUserDao.QueryTagAndUser()
-		if err != nil {
-			log.Println(err)
-			return
-		}
+		tagUsers, _ := dao.SubscribeUserDao.QueryTagAndUser()
+		upTicker := time.NewTicker(time.Minute)
+		sdTicker := time.NewTicker(time.Second * time.Duration(convert.ToInt(env.Conf["send.time"])))
+		go func() {
+			for {
+				<-upTicker.C
+				update = true
+			}
+		}()
 		for {
-			time.Sleep(time.Second * 5)
-			tu := tagUsers[algo_util.RandomInt(0, len(tagUsers)-1)]
-			qqutil.SendPrivateMessage(tu.QQAccount, qqutil.QQMsg{
-				CQ: "image",
-				FileURL: func() string {
-					l := len(dao.FileList[tu.Tag])
-					path := dao.FileList[tu.Tag][algo_util.RandomInt(0, l-1)]
-					return "http://127.0.0.1:" + env.Conf["serve.port"] + "/" + path
-				}(),
-			})
+			<-sdTicker.C
+			// ctx, cancelFunc := context.WithCancel(context.TODO())
+			// cancelFunc()
+			if update {
+				tagUsers, _ = dao.SubscribeUserDao.QueryTagAndUser()
+				update = false
+			} else {
+				if len(tagUsers) < 1 {
+					continue
+				}
+				for _, tus := range tagUsers {
+					go func(qqAccount string, tags []string) {
+						qqutil.SendPrivateMessage(qqAccount, qqutil.QQMsg{
+							CQ: "image",
+							FileURL: func() string {
+								tagMap := dao.FileList.Get(tags[algo_util.RandomInt(0, len(tags)-1)])
+								if tagMap != nil {
+									path := tagMap.Get(algo_util.RandomInt(0, tagMap.Len()-1))
+									if path == "" {
+										return ""
+									}
+									return "http://127.0.0.1:" + env.Conf["serve.port"] + "/" + path
+								}
+								return ""
+							}(),
+						})
+					}(tus.QQAccount, tus.UserTag)
+				}
+			}
 		}
 	}()
 

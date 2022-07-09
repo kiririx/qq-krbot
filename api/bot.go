@@ -7,6 +7,7 @@ import (
 	"github.com/kiririx/krutils/str_util"
 	"log"
 	"net/http"
+	"qq-krbot/qqutil"
 	"qq-krbot/req"
 	"qq-krbot/trigger"
 	"time"
@@ -43,7 +44,15 @@ func Bot(c *gin.Context) {
 					Error(err, param.GroupId)
 					return
 				}
-				sendToGroup(param.GroupId, msg)
+				switch tg.Cq {
+				case "pr":
+					qqutil.SendPrivateMessage(str_util.ToStr(param.UserId), qqutil.QQMsg{
+						Message: msg,
+						CQ:      tg.Cq,
+					})
+				case "at":
+					sendToGroup(param.GroupId, msg)
+				}
 				break
 			}
 		}

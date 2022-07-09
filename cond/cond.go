@@ -57,3 +57,11 @@ func Text(param *req.Param) bool {
 func SubscribePixiv(param *req.Param) bool {
 	return str_util.StartWith(param.Message, "订阅 ")
 }
+
+func UnSubscribePixiv(param *req.Param) bool {
+	return str_util.Equals(param.Message, "取消订阅")
+}
+
+func Health(param *req.Param) bool {
+	return str_util.Equals(param.Message, "ping")
+}
