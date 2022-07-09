@@ -14,7 +14,7 @@ type CollectWorker struct {
 // Start 采集pixiv图片
 func (*CollectWorker) Start() {
 	go func() {
-		tagM := make(map[string]*int)
+		tagM := dao.SyncMap[string, *int]()
 		for {
 			upTicker := time.NewTicker(time.Minute * 1)
 			coTicker := time.NewTicker(time.Second * 45)
@@ -33,16 +33,16 @@ func (*CollectWorker) Start() {
 					update = false
 				} else {
 					for _, tag := range tags {
-						if _, ok := tagM[tag]; !ok {
+						if v := tagM.Get(tag); v != nil {
 							go func(_tag string) {
 								singTagMap := dao.FileList.Get(_tag)
 								if singTagMap != nil && singTagMap.Len() > 500 {
 									return
 								}
 								i := 0
-								tagM[_tag] = &i
+								tagM.Put(_tag, &i)
 								for {
-									log.Println("当前offset：" + str_util.ToStr(i*handler.PixivPageSize))
+									log.Println("当前tag: " + _tag + " offset:" + str_util.ToStr(i*handler.PixivPageSize))
 									urls, err := handler.GetImgUrlForSearch(_tag, i*handler.PixivPageSize)
 									if err != nil {
 										// 发送到qq错误
@@ -60,7 +60,7 @@ func (*CollectWorker) Start() {
 									}
 									i++
 									if i > 30 {
-										delete(tagM, _tag)
+										tagM.Remove(_tag)
 										return
 									}
 								}

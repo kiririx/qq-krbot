@@ -43,6 +43,12 @@ func (c *concurrentMap[K, V]) Len() int {
 	return l
 }
 
+func (c *concurrentMap[K, V]) Remove(k K) {
+	c.lock.Lock()
+	delete(*c.v, k)
+	c.lock.Unlock()
+}
+
 type tag = string
 type files = *concurrentMap[int, string]
 
