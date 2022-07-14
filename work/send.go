@@ -32,28 +32,27 @@ func (*SendWorker) Start() {
 			if update {
 				tagUsers, _ = dao.SubscribeUserDao.QueryTagAndUser()
 				update = false
-			} else {
-				if len(tagUsers) < 1 {
-					continue
-				}
-				for _, tus := range tagUsers {
-					go func(qqAccount string, tags []string) {
-						qqutil.SendPrivateMessage(qqAccount, qqutil.QQMsg{
-							CQ: "image",
-							FileURL: func() string {
-								tagMap := dao.FileList.Get(tags[algo_util.RandomInt(0, len(tags)-1)])
-								if tagMap != nil {
-									path := tagMap.Get(algo_util.RandomInt(0, tagMap.Len()-1))
-									if path == "" {
-										return ""
-									}
-									return "http://127.0.0.1:" + env.Conf["serve.port"] + "/" + path
+			}
+			if len(tagUsers) < 1 {
+				continue
+			}
+			for _, tus := range tagUsers {
+				go func(qqAccount string, tags []string) {
+					qqutil.SendPrivateMessage(qqAccount, qqutil.QQMsg{
+						CQ: "image",
+						FileURL: func() string {
+							tagMap := dao.FileList.Get(tags[algo_util.RandomInt(0, len(tags)-1)])
+							if tagMap != nil {
+								path := tagMap.Get(algo_util.RandomInt(0, tagMap.Len()-1))
+								if path == "" {
+									return ""
 								}
-								return ""
-							}(),
-						})
-					}(tus.QQAccount, tus.UserTag)
-				}
+								return "http://127.0.0.1:" + env.Conf["serve.port"] + "/" + path
+							}
+							return ""
+						}(),
+					})
+				}(tus.QQAccount, tus.UserTag)
 			}
 		}
 	}()
