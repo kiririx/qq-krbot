@@ -1,7 +1,7 @@
 package work
 
 import (
-	"github.com/kiririx/krutils/str_util"
+	"github.com/kiririx/krutils/strx"
 	"github.com/kiririx/krutils/sugar"
 	"log"
 	"qq-krbot/dao"
@@ -47,7 +47,7 @@ func (*CollectWorker) Start() {
 						if i > 30 {
 							return
 						}
-						log.Println("当前tag: " + _tag + " offset:" + str_util.ToStr(i*handler.PixivPageSize))
+						log.Println("当前tag: " + _tag + " offset:" + strx.ToStr(i*handler.PixivPageSize))
 						urls, err := handler.GetImgUrlForSearch(_tag, i*handler.PixivPageSize)
 						if err != nil {
 							// 发送到qq错误

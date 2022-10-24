@@ -3,8 +3,8 @@ package api
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/kiririx/krutils/http_util"
-	"github.com/kiririx/krutils/str_util"
+	"github.com/kiririx/krutils/httpx"
+	"github.com/kiririx/krutils/strx"
 	"log"
 	"net/http"
 	"qq-krbot/qqutil"
@@ -46,7 +46,7 @@ func Bot(c *gin.Context) {
 				}
 				switch tg.Cq {
 				case "pr":
-					qqutil.SendPrivateMessage(str_util.ToStr(param.UserId), qqutil.QQMsg{
+					qqutil.SendPrivateMessage(strx.ToStr(param.UserId), qqutil.QQMsg{
 						Message: msg,
 						CQ:      tg.Cq,
 					})
@@ -61,8 +61,8 @@ func Bot(c *gin.Context) {
 
 func sendToGroup(groupId int64, msg string) {
 	url := CqHttp + "/send_group_msg"
-	sendGroupId := str_util.ToStr(groupId)
-	resp, err := http_util.Client().Timeout(time.Second*30).PostString(url, map[string]any{
+	sendGroupId := strx.ToStr(groupId)
+	resp, err := httpx.Client().Timeout(time.Second*30).PostString(url, map[string]any{
 		"group_id": sendGroupId,
 		"message":  msg,
 	})

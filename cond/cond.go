@@ -1,8 +1,8 @@
 package cond
 
 import (
-	"github.com/kiririx/krutils/map_util"
-	"github.com/kiririx/krutils/str_util"
+	"github.com/kiririx/krutils/mapx"
+	"github.com/kiririx/krutils/strx"
 	"qq-krbot/handler"
 	"qq-krbot/req"
 )
@@ -25,43 +25,43 @@ func init() {
 }
 
 func Help(param *req.Param) bool {
-	return str_util.Contains(param.Message, "ヘルプ", "帮助", "help", "?", "？")
+	return strx.Contains(param.Message, "ヘルプ", "帮助", "help", "?", "？")
 }
 
 func DNFGold(param *req.Param) bool {
-	return str_util.Contains(param.Message, "DNF", "dnf", "ゴールド", "金币", "比例")
+	return strx.Contains(param.Message, "DNF", "dnf", "ゴールド", "金币", "比例")
 }
 
 func Translate(param *req.Param) bool {
-	prefix := str_util.SubStr(param.Message, -1, 2)
-	return map_util.ContainsKey(handler.LangReflect, prefix)
+	prefix := strx.SubStr(param.Message, -1, 2)
+	return mapx.ContainsKey(handler.LangReflect, prefix)
 }
 
 func EroImagesSearch(param *req.Param) bool {
-	return str_util.StartWith(param.Message, "#")
+	return strx.StartWith(param.Message, "#")
 }
 
 func EroImages(param *req.Param) bool {
-	return str_util.Contains(param.Message, "色图", "涩图")
+	return strx.Contains(param.Message, "色图", "涩图")
 }
 
 func SimpleReflect(param *req.Param) bool {
-	return map_util.ContainsKey(BaseReflect, param.Message)
+	return mapx.ContainsKey(BaseReflect, param.Message)
 }
 
 func Text(param *req.Param) bool {
-	return str_util.Equals(param.Message, "文章", "课文")
+	return strx.Equals(param.Message, "文章", "课文")
 }
 
 // SubscribePixiv 订阅p站色图
 func SubscribePixiv(param *req.Param) bool {
-	return str_util.StartWith(param.Message, "订阅 ")
+	return strx.StartWith(param.Message, "订阅 ")
 }
 
 func UnSubscribePixiv(param *req.Param) bool {
-	return str_util.Equals(param.Message, "取消订阅")
+	return strx.Equals(param.Message, "取消订阅")
 }
 
 func Health(param *req.Param) bool {
-	return str_util.Equals(param.Message, "ping")
+	return strx.Equals(param.Message, "ping")
 }

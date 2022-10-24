@@ -1,8 +1,8 @@
 package work
 
 import (
-	"github.com/kiririx/krutils/algo_util"
-	"github.com/kiririx/krutils/convert"
+	"github.com/kiririx/krutils/algox"
+	"github.com/kiririx/krutils/convertx"
 	"qq-krbot/dao"
 	"qq-krbot/env"
 	"qq-krbot/qqutil"
@@ -18,7 +18,7 @@ func (*SendWorker) Start() {
 		// query to subscribe and user list
 		tagUsers, _ := dao.SubscribeUserDao.QueryTagAndUser()
 		upTicker := time.NewTicker(time.Minute)
-		sdTicker := time.NewTicker(time.Second * time.Duration(convert.ToInt(env.Conf["send.time"])))
+		sdTicker := time.NewTicker(time.Second * time.Duration(convertx.ToInt(env.Conf["send.time"])))
 		go func() {
 			for {
 				<-upTicker.C
@@ -41,9 +41,9 @@ func (*SendWorker) Start() {
 					qqutil.SendPrivateMessage(qqAccount, qqutil.QQMsg{
 						CQ: "image",
 						FileURL: func() string {
-							tagMap := dao.FileList.Get(tags[algo_util.RandomInt(0, len(tags)-1)])
+							tagMap := dao.FileList.Get(tags[algox.RandomInt(0, len(tags)-1)])
 							if tagMap != nil {
-								path := tagMap.Get(algo_util.RandomInt(0, tagMap.Len()-1))
+								path := tagMap.Get(algox.RandomInt(0, tagMap.Len()-1))
 								if path == "" {
 									return ""
 								}

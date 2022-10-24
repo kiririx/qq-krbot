@@ -55,19 +55,19 @@ func initORM(dsn string, idle, max int, life time.Duration) {
 		})
 
 		if err != nil {
-			logx.ErrorLog(`InitORM Err:`, fmt.Sprintf("数据库配置错误:%s, 尝试重新连接", err.Error()))
+			logx.ERR(fmt.Errorf(`InitORM Err: %v`, fmt.Sprintf("数据库配置错误:%s, 尝试重新连接", err.Error())))
 			return err
 		}
 
 		// 获取连接实例，其实当前方法内部只用到了Ping探活
 		Conn, err = Sql.DB()
 		if err != nil {
-			logx.ErrorLog(`InitORM Err:`, fmt.Sprintf("数据库连接失败:%s, 尝试重新连接", err.Error()))
+			logx.ERR(fmt.Errorf(`InitORM Err: %v`, fmt.Sprintf("数据库连接失败:%s, 尝试重新连接", err.Error())))
 			return err
 		}
 
 		if err = Conn.Ping(); err != nil {
-			logx.ErrorLog(`InitORM Err:`, fmt.Sprintf("数据库心跳失败:%s, 尝试重新连接", err.Error()))
+			logx.ERR(fmt.Errorf(`InitORM Err: %v`, fmt.Sprintf("数据库心跳失败:%s, 尝试重新连接", err.Error())))
 			return err
 		}
 

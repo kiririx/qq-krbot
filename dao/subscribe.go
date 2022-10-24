@@ -1,6 +1,6 @@
 package dao
 
-import "github.com/kiririx/krutils/map_util"
+import "github.com/kiririx/krutils/mapx"
 
 var SubscribeDao = &_SubscribeDao{}
 var SubscribeUserDao = &_SubscribeUserDao{}
@@ -72,7 +72,7 @@ func (*_SubscribeUserDao) QueryTagAndUser() ([]TagAndUser, error) {
 	}
 	taM := make(map[string][]string)
 	for _, v := range dbTmp {
-		if map_util.ContainsKey(taM, v.QQAccount) {
+		if mapx.ContainsKey(taM, v.QQAccount) {
 			taM[v.QQAccount] = func() []string {
 				tmp := taM[v.QQAccount]
 				tmp = append(tmp, v.Tag)

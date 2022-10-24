@@ -2,7 +2,7 @@ package qqutil
 
 import (
 	"fmt"
-	"github.com/kiririx/krutils/http_util"
+	"github.com/kiririx/krutils/httpx"
 	"log"
 	"qq-krbot/env"
 	"time"
@@ -23,7 +23,7 @@ func SendPrivateMessage(targetQQ string, msg QQMsg) {
 		return
 	}
 	url := cqHttp + "/send_private_msg"
-	resp, err := http_util.Client().Timeout(time.Second*30).Headers(map[string]string{
+	resp, err := httpx.Client().Timeout(time.Second*30).Headers(map[string]string{
 		"content-type": "application/json",
 	}).PostString(url, map[string]any{
 		"message": func() string {

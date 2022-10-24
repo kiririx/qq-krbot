@@ -3,9 +3,9 @@ package resp
 import (
 	"errors"
 	"fmt"
-	"github.com/kiririx/krutils/algo_util"
-	"github.com/kiririx/krutils/slice_util"
-	"github.com/kiririx/krutils/str_util"
+	"github.com/kiririx/krutils/algox"
+	"github.com/kiririx/krutils/slicex"
+	"github.com/kiririx/krutils/strx"
 	"io/ioutil"
 	"qq-krbot/dao"
 	"qq-krbot/handler"
@@ -58,7 +58,7 @@ func DNFGold(*req.Param) (string, error) {
 	}
 	msg := "🌸跨六(uu898): 🌸\n\n"
 	for _, v := range gold {
-		msg += "比例: " + str_util.ToStr(v.Scale) + "/1    形式: " + v.TradeType + "\n"
+		msg += "比例: " + strx.ToStr(v.Scale) + "/1    形式: " + v.TradeType + "\n"
 	}
 	return msg, nil
 }
@@ -74,14 +74,14 @@ func Help(*req.Param) (string, error) {
 }
 
 func Translate(r *req.Param) (string, error) {
-	transType := str_util.SubStr(r.Message, -1, 2)
-	transText := str_util.SubStr(r.Message, 3, -1)
+	transType := strx.SubStr(r.Message, -1, 2)
+	transText := strx.SubStr(r.Message, 3, -1)
 	result := "🌸翻译结果🌸：" + handler.Translate(handler.LangReflect[transType], transText)
 	return AtResp(result, r.UserId), nil
 }
 
 func EroImagesSearch(r *req.Param) (string, error) {
-	tag := str_util.SubStr(r.Message, 1, -1)
+	tag := strx.SubStr(r.Message, 1, -1)
 	m, err := handler.Search(tag, handler.PixivPageSize)
 	if err != nil {
 		return "", err
@@ -115,11 +115,11 @@ func download(photos []string) (string, error) {
 	if len(photos) < 1 {
 		return "", errors.New("all photos download failed")
 	}
-	i := algo_util.RandomInt(0, len(photos))
+	i := algox.RandomInt(0, len(photos))
 	p := photos[i]
 	imgName, err := handler.DownloadImg(p)
 	if err != nil {
-		imgName, err = download(slice_util.Remove(photos, i))
+		imgName, err = download(slicex.Remove(photos, i))
 		if err != nil {
 			return "", err
 		}
@@ -128,7 +128,7 @@ func download(photos []string) (string, error) {
 }
 
 func EroImages(*req.Param) (string, error) {
-	fileName := AnimeImages[algo_util.RandomInt(0, len(AnimeImages))]
+	fileName := AnimeImages[algox.RandomInt(0, len(AnimeImages))]
 	return ImgResp("http://127.0.0.1:10013/photo/"+fileName, 0), nil
 }
 
@@ -157,9 +157,9 @@ func SimpleReflect(*req.Param) (string, error) {
 }
 
 func SubscribePixiv(param *req.Param) (string, error) {
-	tag := str_util.SubStr(param.Message, 3, -1)
-	tag = str_util.TrimSpace(tag)
-	_, err := dao.SubscribeDao.Save(tag, str_util.ToStr(param.UserId))
+	tag := strx.SubStr(param.Message, 3, -1)
+	tag = strx.TrimSpace(tag)
+	_, err := dao.SubscribeDao.Save(tag, strx.ToStr(param.UserId))
 	if err != nil {
 		return "", err
 	}
@@ -167,7 +167,7 @@ func SubscribePixiv(param *req.Param) (string, error) {
 }
 
 func UnSubscribePixiv(param *req.Param) (string, error) {
-	err := dao.SubscribeUserDao.ClearByUser(str_util.ToStr(param.UserId))
+	err := dao.SubscribeUserDao.ClearByUser(strx.ToStr(param.UserId))
 	if err != nil {
 		return "", err
 	}

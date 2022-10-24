@@ -5,9 +5,9 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/kiririx/krutils/algo_util"
-	"github.com/kiririx/krutils/http_util"
-	"github.com/kiririx/krutils/str_util"
+	"github.com/kiririx/krutils/algox"
+	"github.com/kiririx/krutils/httpx"
+	"github.com/kiririx/krutils/strx"
 	"io"
 	"os"
 	"path"
@@ -55,13 +55,13 @@ func GetHeaders() (map[string]string, error) {
 
 func DownloadImg(url string) (string, error) {
 	ext, _ := GetFileExt(url)
-	fileName := algo_util.MD5(url) + "." + ext
+	fileName := algox.MD5(url) + "." + ext
 	_, err := os.Stat("./photo/" + fileName)
 	if err == nil {
 		return fileName, nil
 	}
 	referer := "https://www.pixiv.net/"
-	resp, err := http_util.Client().Timeout(time.Second*99).Proxy(proxyUrl).Headers(map[string]string{
+	resp, err := httpx.Client().Timeout(time.Second*99).Proxy(proxyUrl).Headers(map[string]string{
 		"Referer": referer,
 	}).Get(url, nil)
 	if err != nil {
@@ -85,13 +85,13 @@ func DownloadImgAndTag(url string, tag string) (string, error) {
 		return "", err
 	}
 	ext, _ := GetFileExt(url)
-	fileName := algo_util.MD5(url) + "." + ext
+	fileName := algox.MD5(url) + "." + ext
 	_, err = os.Stat(dirPath + "/" + fileName)
 	if err == nil {
 		return fileName, nil
 	}
 	referer := "https://www.pixiv.net/"
-	resp, err := http_util.Client().Timeout(time.Second*99).Proxy(proxyUrl).Headers(map[string]string{
+	resp, err := httpx.Client().Timeout(time.Second*99).Proxy(proxyUrl).Headers(map[string]string{
 		"Referer": referer,
 	}).Get(url, nil)
 	if err != nil {
@@ -133,7 +133,7 @@ func Auth() error {
 	px.Headers["X-Client-Time"] = localTime
 	px.Headers["X-Client-Hash"] = genClientHash(localTime)
 	px.Headers["User-Agent"] = "PixivAndroidApp/5.0.115 (Android 6.0)"
-	json, err := http_util.Client().
+	json, err := httpx.Client().
 		Timeout(time.Second*10).
 		Proxy(env.Conf["proxy.url"]).
 		PostFormGetJSON("https://oauth.secure.pixiv.net"+"/auth/token", map[string]string{
@@ -167,7 +167,7 @@ func Rank() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	json, err := http_util.Client().Proxy(proxyUrl).Headers(headers).GetJSON(url, map[string]string{
+	json, err := httpx.Client().Proxy(proxyUrl).Headers(headers).GetJSON(url, map[string]string{
 		"mode":   mode,
 		"filter": filter,
 	})
@@ -197,7 +197,7 @@ func Recommend() (map[string]interface{}, error) {
 		return nil, err
 	}
 	headers[`include_ranking_label`] = "true"
-	json, err := http_util.Client().Proxy(proxyUrl).Headers(headers).GetJSON(req, map[string]string{})
+	json, err := httpx.Client().Proxy(proxyUrl).Headers(headers).GetJSON(req, map[string]string{})
 	if err != nil {
 		fmt.Println(err.Error())
 		return nil, err
@@ -211,12 +211,12 @@ func Search(tag string, offset int) (map[string]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	json, err := http_util.Client().Timeout(time.Second*10).Proxy(proxyUrl).Headers(headers).GetJSON(url, map[string]string{
+	json, err := httpx.Client().Timeout(time.Second*10).Proxy(proxyUrl).Headers(headers).GetJSON(url, map[string]string{
 		"word":          tag,
 		"search_target": "partial_match_for_tags",
 		"sort":          "popular_desc",
 		"filter":        "for_ios",
-		"offset":        str_util.ToStr(offset),
+		"offset":        strx.ToStr(offset),
 	})
 	if err != nil {
 		fmt.Println(err.Error())
@@ -246,7 +246,7 @@ re:
 		for _, t := range tags {
 			_t := t.(map[string]interface{})
 			// 过滤掉这些tag
-			if str_util.Contains(_t["name"].(string), "描き方", "参考", "講座", "資料", "漫画") {
+			if strx.Contains(_t["name"].(string), "描き方", "参考", "講座", "資料", "漫画") {
 				continue re
 			}
 		}
