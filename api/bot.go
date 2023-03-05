@@ -78,5 +78,9 @@ func sendToGroup(groupId int64, msg string) {
 func Error(err error, groupId int64) {
 	if err != nil {
 		log.Println(groupId, "Error => 🌸", err)
+		qqutil.SendPrivateMessage(strx.ToStr(2187391949), qqutil.QQMsg{
+			Message: err.Error(),
+			CQ:      "pr",
+		})
 	}
 }

@@ -1,4 +1,4 @@
-package cond
+package trigger
 
 import (
 	"github.com/kiririx/krutils/mapx"
@@ -64,4 +64,8 @@ func UnSubscribePixiv(param *req.Param) bool {
 
 func Health(param *req.Param) bool {
 	return strx.Equals(param.Message, "ping")
+}
+
+func PasswdManage(param *req.Param) bool {
+	return strx.StartWith(param.Message, "密码")
 }

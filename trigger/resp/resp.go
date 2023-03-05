@@ -177,3 +177,7 @@ func UnSubscribePixiv(param *req.Param) (string, error) {
 func Health(param *req.Param) (string, error) {
 	return "pong", nil
 }
+
+func PasswdManage(param *req.Param) (string, error) {
+	return "pong", nil
+}

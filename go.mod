@@ -8,8 +8,9 @@ replace github.com/kiririx/amasugi => ../amasugi
 
 require (
 	github.com/gin-gonic/gin v1.8.1
-	github.com/kiririx/krutils v0.0.3
-	github.com/kiririx/amasugi v1.0.0
+	github.com/kiririx/krutils v0.0.8
+	gorm.io/driver/mysql v1.4.3
+	gorm.io/gorm v1.24.0
 )
 
 require (
