@@ -25,11 +25,11 @@ func init() {
 }
 
 func Help(param *req.Param) bool {
-	return strx.Contains(param.Message, "ヘルプ", "帮助", "help", "?", "？")
+	return strx.Equals(param.Message, "ヘルプ", "帮助", "help", "?", "？")
 }
 
 func DNFGold(param *req.Param) bool {
-	return strx.Contains(param.Message, "DNF", "dnf", "ゴールド", "金币", "比例")
+	return strx.Equals(param.Message, "DNF", "dnf", "ゴールド", "金币", "比例")
 }
 
 func Translate(param *req.Param) bool {
@@ -68,4 +68,8 @@ func Health(param *req.Param) bool {
 
 func PasswdManage(param *req.Param) bool {
 	return strx.StartWith(param.Message, "密码")
+}
+
+func ChatGPT(param *req.Param) bool {
+	return true
 }

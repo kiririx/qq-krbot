@@ -4,10 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"github.com/kiririx/krutils/algox"
+	"github.com/kiririx/krutils/convertx"
+	"github.com/kiririx/krutils/httpx"
 	"github.com/kiririx/krutils/slicex"
 	"github.com/kiririx/krutils/strx"
 	"io/ioutil"
 	"qq-krbot/dao"
+	"qq-krbot/env"
 	"qq-krbot/handler"
 	"qq-krbot/req"
 	"time"
@@ -180,4 +183,36 @@ func Health(param *req.Param) (string, error) {
 
 func PasswdManage(param *req.Param) (string, error) {
 	return "pong", nil
+}
+
+func ChatGPT(param *req.Param) (string, error) {
+	timeout := env.Conf["chatgpt.timeout"]
+	proxyURL := env.Conf["proxy.url"]
+	cli := httpx.Client()
+	if proxyURL != "" {
+		cli.Proxy(proxyURL)
+	}
+
+	apiServerURL := env.Conf["chatgpt.server.url"]
+	if apiServerURL == "" {
+		apiServerURL = "https://api.openai.com"
+	}
+
+	json, err := cli.Timeout(time.Second*time.Duration(convertx.ToInt(timeout))).Headers(map[string]string{
+		"Content-Type":  "application/json",
+		"Authorization": "Bearer " + env.Conf["chatgpt.key"],
+	}).PostJSON(apiServerURL+"/v1/chat/completions", map[string]any{
+		"model":       env.Conf["chatgpt.model"],
+		"messages":    []any{map[string]string{"role": "user", "content": param.Message}},
+		"temperature": 0.7,
+	})
+	if err != nil {
+		return "", err
+	}
+	fmt.Println(json)
+	choices := json["choices"].([]any)
+	choice := choices[0]
+	message := choice.(map[string]any)["message"].(map[string]any)
+	content := message["content"]
+	return strx.TrimSpace(content.(string)), err
 }

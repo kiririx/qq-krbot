@@ -30,14 +30,15 @@ func addTrigger(cq string, condition func(*req.Param) bool, callback func(*req.P
 }
 
 func init() {
-	addTrigger(pr, Help, resp.Help)                       // 帮助
-	addTrigger(pr, DNFGold, resp.DNFGold)                 // dnf金币
-	addTrigger(pr, Translate, resp.Translate)             // 翻译
+	addTrigger(pr, Help, resp.Help)       // 帮助
+	addTrigger(pr, DNFGold, resp.DNFGold) // dnf金币
+	// addTrigger(pr, Translate, resp.Translate)             // 翻译
 	addTrigger(pr, EroImagesSearch, resp.EroImagesSearch) // 色图搜索
 	addTrigger(pr, EroImages, resp.EroImages)
-	addTrigger(pr, Text, resp.Text)                         //
-	addTrigger(pr, SubscribePixiv, resp.SubscribePixiv)     // 订阅pixiv
-	addTrigger(pr, UnSubscribePixiv, resp.UnSubscribePixiv) // 取消订阅pixiv
-	addTrigger(pr, Health, resp.Health)                     // ping
-	addTrigger(Master, PasswdManage, resp.PasswdManage)     // 密码管理
+	// addTrigger(pr, Text, resp.Text)                         //
+	// addTrigger(pr, SubscribePixiv, resp.SubscribePixiv)     // 订阅pixiv
+	// addTrigger(pr, UnSubscribePixiv, resp.UnSubscribePixiv) // 取消订阅pixiv
+	addTrigger(pr, Health, resp.Health)                 // ping
+	addTrigger(Master, PasswdManage, resp.PasswdManage) // 密码管理
+	addTrigger(pr, ChatGPT, resp.ChatGPT)
 }
