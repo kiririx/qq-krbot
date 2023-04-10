@@ -38,7 +38,8 @@ func init() {
 	// addTrigger(pr, Text, resp.Text)                         //
 	// addTrigger(pr, SubscribePixiv, resp.SubscribePixiv)     // 订阅pixiv
 	// addTrigger(pr, UnSubscribePixiv, resp.UnSubscribePixiv) // 取消订阅pixiv
-	addTrigger(pr, Health, resp.Health)                 // ping
-	addTrigger(Master, PasswdManage, resp.PasswdManage) // 密码管理
+	addTrigger(pr, Health, resp.Health) // ping
+	// addTrigger(Master, PasswdManage, resp.PasswdManage) // 密码管理
+	addTrigger(at, ChatGPT, resp.ChatGPT)
 	addTrigger(pr, ChatGPT, resp.ChatGPT)
 }

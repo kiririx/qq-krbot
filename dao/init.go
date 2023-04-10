@@ -11,7 +11,6 @@ import (
 	"gorm.io/gorm/logger"
 	"log"
 	"os"
-	"qq-krbot/env"
 	"sync"
 	"time"
 )
@@ -22,14 +21,14 @@ var (
 )
 
 func init() {
-	initORM(fmt.Sprintf(
-		`%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local&&timeout=1s&readTimeout=5s&writeTimeout=5s`,
-		env.Conf[`mysql.username`],
-		env.Conf[`mysql.password`],
-		env.Conf[`mysql.host`],
-		env.Conf[`mysql.port`],
-		env.Conf[`mysql.database`],
-	), 10, 500, time.Minute*15)
+	// initORM(fmt.Sprintf(
+	// 	`%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local&&timeout=1s&readTimeout=5s&writeTimeout=5s`,
+	// 	env.Conf[`mysql.username`],
+	// 	env.Conf[`mysql.password`],
+	// 	env.Conf[`mysql.host`],
+	// 	env.Conf[`mysql.port`],
+	// 	env.Conf[`mysql.database`],
+	// ), 10, 500, time.Minute*15)
 }
 
 func initORM(dsn string, idle, max int, life time.Duration) {

@@ -185,6 +185,8 @@ func PasswdManage(param *req.Param) (string, error) {
 	return "pong", nil
 }
 
+var messageMap = make(map[int64]*[]map[string]string)
+
 func ChatGPT(param *req.Param) (string, error) {
 	timeout := env.Conf["chatgpt.timeout"]
 	proxyURL := env.Conf["proxy.url"]
@@ -198,6 +200,12 @@ func ChatGPT(param *req.Param) (string, error) {
 		apiServerURL = "https://api.openai.com"
 	}
 
+	userMessageArr := messageMap[param.UserId]
+	if userMessageArr == nil {
+		userMessageArr = &[]map[string]string{}
+	}
+	*userMessageArr = append(*userMessageArr, map[string]string{"role": "user", "content": param.Message})
+
 	json, err := cli.Timeout(time.Second*time.Duration(convertx.ToInt(timeout))).Headers(map[string]string{
 		"Content-Type":  "application/json",
 		"Authorization": "Bearer " + env.Conf["chatgpt.key"],
@@ -207,6 +215,7 @@ func ChatGPT(param *req.Param) (string, error) {
 		"temperature": 0.7,
 	})
 	if err != nil {
+		*userMessageArr = slicex.Remove(*userMessageArr, len(*userMessageArr)-1)
 		return "", err
 	}
 	fmt.Println(json)
@@ -214,5 +223,12 @@ func ChatGPT(param *req.Param) (string, error) {
 	choice := choices[0]
 	message := choice.(map[string]any)["message"].(map[string]any)
 	content := message["content"]
+
+	*userMessageArr = append(*userMessageArr, map[string]string{"role": "assistant", "content": content.(string)})
+
+	// remove any element
+	if len(*userMessageArr) == 6 {
+		*userMessageArr = (*userMessageArr)[len(*userMessageArr)-4:]
+	}
 	return strx.TrimSpace(content.(string)), err
 }
